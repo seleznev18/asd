@@ -1,0 +1,137 @@
+def find_corners(matrix,symb):
+    x1,x2,y1,y2=-1,-1,-1,-1
+    for x in range(len(matrix[0])):
+        for y in range(len(matrix)):
+            if matrix[y][x]==symb:
+                if x1==-1:
+                    x1=x
+                if y1==-1:
+                    y1=y
+                x2=max(x,x2)
+                y2=max(y2,y)
+    return x1,x2,y1,y2
+def check_for_I(matrix,n,x1,x2,y1,y2):
+    flag=True
+    for x in range(x1,x2+1):
+        for y in range(y1,y2+1):
+            if matrix[y][x]!='#':
+                flag=False
+                break
+    return flag
+def check_for_OCL(matrix,x1,x2,y1,y2):
+    letter_matrix=[[matrix[y][x] for x in range(x1,x2+1)] for y in range(y1,y2+1)]
+    void_x1,void_x2,void_y1,void_y2=find_corners(letter_matrix,'.')
+    flag=True
+    for x in range(void_x1,void_x2+1):
+        for y in range(void_y1,void_y2+1):
+            if (void_x1<=x<=void_x2 and void_y1<=y<=void_y2):
+                if letter_matrix[y][x]!='.':
+                    flag=False
+                    break
+            else:
+                if letter_matrix[y][x]!='#':
+                    flag=False
+                    break
+    if flag==True:
+        if 0<void_x1<=void_x2<len(letter_matrix[0]) and 0<void_y1<=void_y2<len(letter_matrix):
+            return 'O'
+        elif  0==void_y1<=void_y2<len(letter_matrix) and 0<void_x1<=len(letter_matrix[0])==void_x2:
+            return 'L'
+        elif 0<void_x1<=len(letter_matrix[0])==void_x2 and 0<void_y1<=void_y2<len(letter_matrix):
+            return 'C'
+        else:
+            return False
+    else:
+        return False
+def check_for_H(matrix,x1,x2,y1,y2):
+    letter_matrix=[[matrix[y][x] for x in range(x1,x2+1)] for y in range(y1,y2+1)]
+    void_x1,void_x2,void_y1,void_y2=find_corners(letter_matrix,'.')
+    first_light,last_light=-1,-1
+    for y in range(void_y1+1,void_y2+1):
+        if letter_matrix[y][void_x1]=='#':
+            if first_light!=-1:
+                if last_light!=-1:
+                    return False
+            else:
+                first_light=y
+        else:
+            if letter_matrix[y-1][void_x1]=='#':
+                if last_light!=-1:
+                    return False
+                else:
+                    last_light=y-1
+    for x in range(void_x1+1,void_x2+1):
+        for y in range(void_y1,void_y2+1):
+            if (letter_matrix[y][x]=='#' and not(first_light<=y<=last_light)) or (letter_matrix[y][x]=='.' and (first_light<=y<=last_light)):
+                return False
+    if  0<void_x1<=void_x2<len(letter_matrix[0]) and len(letter_matrix)-1==void_y2>last_light>=first_light>=void_y1==0:
+        return 'H'
+    else:
+        return False
+def check_for_P(matrix,x1,x2,y1,y2):
+    letter_matrix=[[matrix[y][x] for x in range(x1,x2+1)] for y in range(y1,y2+1)]
+    void_x1,void_x2,void_y1,void_y2=find_corners(letter_matrix,'.')
+    first_light,last_light=-1,-1
+    for y in range(void_y1+1,void_y2+1):
+        if letter_matrix[y][void_x1]=='#':
+            if first_light!=-1:
+                if last_light!=-1:
+                    return False
+            else:
+                first_light=y
+        else:
+            if letter_matrix[y-1][void_x1]=='#':
+                if last_light!=-1:
+                    return False
+                    
+                else:
+                    last_light=y-1
+    x6=-1
+    for x in range(void_x1+1,void_x2+1):
+        for y in range(void_y1,void_y2+1):
+            if (letter_matrix[y][x]=='#' and not(first_light<=y<=last_light)):
+                if y!=void_y1:
+                    return False
+                else:
+                    if all([letter_matrix[curr_y][x]=='#' for curr_y in range(void_y1,last_light+1)]):
+                        x6=x
+                        break
+                    else:
+                        return False
+            if (letter_matrix[y][x]=='.' and (first_light<=y<=last_light)):
+                return False
+        if x6!=-1:
+            break
+    if x6==-1:
+        return False
+    for x in range(x6+1,void_x2+1):
+        for y in range(void_y1,void_y2+1):
+            if (letter_matrix[y][x]=='#' and (y>last_light )) or (letter_matrix[y][x]=='.' and (y<=last_light)):
+                return False
+    if  0<void_x1<=x6<=void_x2==len(letter_matrix[0])-1 and len(letter_matrix)-1==void_y2>=last_light>=first_light>void_y1>0:
+        return 'P'
+    else:
+        return False
+n=int(input())
+matrix=[]
+for _ in range(n):
+    matrix.append([char for char in input()])
+x1,x2,y1,y2=find_corners(matrix,'#')
+I=check_for_I(matrix,n,x1,x2,y1,y2)
+if I:
+    print('I')
+else:
+    OCL=check_for_OCL(matrix,x1,x2,y1,y2)
+    if OCL!=False:
+        print(OCL)
+    else:
+        H=check_for_H(matrix,x1,x2,y1,y2)
+        if H!=False:
+            print(H)
+        else:
+            P=check_for_P(matrix,x1,x2,y1,y2)
+            if P!=False:
+                print('P')
+            else:
+                print('X')
+            
